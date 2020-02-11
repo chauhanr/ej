@@ -55,4 +55,5 @@ func init() {
 	loginCmd.MarkFlagRequired("password")
 	loginCmd.MarkFlagRequired("url")
 	rootCmd.AddCommand(loginCmd)
+
 }

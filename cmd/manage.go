@@ -4,7 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"path/filepath"
+
 	"github.com/spf13/cobra"
+)
+
+const (
+	EJ_HOME = ".ej"
+	EJ_CONF = "conf.json"
 )
 
 var versionCmd = &cobra.Command{
@@ -32,7 +39,15 @@ func login(cmd *cobra.Command, args []string) {
 	a := cmd.Flag("url")
 	h := os.Getenv("HOME")
 
-	fmt.Printf("Home Dir: %s\n", h)
-	fmt.Printf("Username:  %s, Password %s, url %s\n", u.Value, p.Value, a.Value)
+	ep := filepath.Join(h, EJ_HOME, EJ_CONF)
 
+	un := u.Value.String()
+	pa := p.Value.String()
+	url := a.Value.String()
+
+	c := EJConfig{Username: un, Password: pa, Url: url}
+	err := c.saveConfig(ep)
+	if err != nil {
+		fmt.Printf("Error saving creds: %s\n", err)
+	}
 }
