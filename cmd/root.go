@@ -15,6 +15,13 @@ var banner = `
  | |___| |__| |
  |______\____/ 
                `
+
+var (
+	username string
+	password string
+	url      string
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "ej",
 	Short: "Jira Explorer",
@@ -33,12 +40,19 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
-}
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version number for the ej app",
-	Long:  `All software has versions. This is ej's`,
-	Run:   version,
+	/* Manangement Commands
+	 * Version - simple version command that gives the version of the application.
+	 * Login - command allows for the command to login to the system
+	 * Logout - this command will allow the users logout from the system.
+	 */
+	rootCmd.AddCommand(versionCmd)
+
+	loginCmd.Flags().StringVarP(&username, "username", "u", "", "username for login")
+	loginCmd.Flags().StringVarP(&password, "password", "p", "", "user password login")
+	loginCmd.Flags().StringVarP(&url, "url", "a", "", "url for the jira instance")
+	loginCmd.MarkFlagRequired("username")
+	loginCmd.MarkFlagRequired("password")
+	loginCmd.MarkFlagRequired("url")
+	rootCmd.AddCommand(loginCmd)
 }
