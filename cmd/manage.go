@@ -2,16 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
-	"path/filepath"
+	"net/http"
 
 	"github.com/spf13/cobra"
-)
-
-const (
-	EJ_HOME = ".ej"
-	EJ_CONF = "conf.json"
 )
 
 var versionCmd = &cobra.Command{
@@ -37,17 +30,43 @@ func login(cmd *cobra.Command, args []string) {
 	u := cmd.Flag("username")
 	p := cmd.Flag("password")
 	a := cmd.Flag("url")
-	h := os.Getenv("HOME")
-
-	ep := filepath.Join(h, EJ_HOME, EJ_CONF)
 
 	un := u.Value.String()
 	pa := p.Value.String()
 	url := a.Value.String()
 
-	c := EJConfig{Username: un, Password: pa, Url: url}
-	err := c.saveConfig(ep)
-	if err != nil {
-		fmt.Printf("Error saving creds: %s\n", err)
+	b := JiraUrlBuilder{Base: url}
+
+	c := EJConfig{Username: un, Password: pa, Url: url, B64: EncodeCreds(un, pa)}
+	hc := HttpClient{Client: &http.Client{}}
+
+	auth := isUserAuthCorrect(b.BuildAuthCheckUrl(""), c, hc)
+	if auth {
+		err := c.saveConfig()
+		if err != nil {
+			fmt.Printf("Error saving creds: %s\n", err)
+		} else {
+			fmt.Printf("Success: you have successfully logged into Jira instance\n")
+		}
+	} else {
+		fmt.Println("Explorer could not authenticate you against the Jira instance.")
 	}
+}
+
+func isUserAuthCorrect(url string, c EJConfig, hc HttpClient) bool {
+	code, err := hc.HEAD(url, c)
+	if code == 200 {
+		// means authentication is successful. Need to save the config
+		return true
+	} else if code == 401 {
+		fmt.Printf("Error: User %s is not authenticated for this site: %s check your creds\n", c.Username, c.Url)
+		return false
+	} else if code == 403 {
+		fmt.Printf("Error: User %s has the correct creds but does not have the right access \n", c.Username)
+		return false
+	} else {
+		fmt.Printf("Error: %s\n", err)
+		return false
+	}
+	return true
 }
