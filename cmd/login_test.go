@@ -50,7 +50,7 @@ func TestLoginAuthCheck403(t *testing.T) {
 	cli := HttpClient{Client: hc}
 	code := isUserAuthCorrect(testConf403.Url, testConf403, cli)
 	if code != http.StatusForbidden {
-		t.Errorf("Expected status code %d but got %d for case: %v", http.StatusOK, code, testConf200)
+		t.Errorf("Expected status code %d but got %d for case: %v", http.StatusForbidden, code, testConf403)
 	}
 }
 
@@ -60,7 +60,7 @@ func TestLoginAuthCheck401(t *testing.T) {
 	cli := HttpClient{Client: hc}
 	code := isUserAuthCorrect(testConf401.Url, testConf401, cli)
 	if code != http.StatusUnauthorized {
-		t.Errorf("Expected status code %d but got %d for case: %v", http.StatusOK, code, testConf200)
+		t.Errorf("Expected status code %d but got %d for case: %v", http.StatusUnauthorized, code, testConf401)
 	}
 }
 
@@ -76,7 +76,6 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-
 }
 
 func getAuthHeader(u, p string) string {
