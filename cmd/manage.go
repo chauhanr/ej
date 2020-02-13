@@ -41,7 +41,7 @@ func login(cmd *cobra.Command, args []string) {
 	hc := HttpClient{Client: &http.Client{}}
 
 	auth := isUserAuthCorrect(b.BuildAuthCheckUrl(""), c, hc)
-	if auth {
+	if auth == http.StatusOK {
 		err := c.saveConfig()
 		if err != nil {
 			fmt.Printf("Error saving creds: %s\n", err)
@@ -51,22 +51,4 @@ func login(cmd *cobra.Command, args []string) {
 	} else {
 		fmt.Println("Explorer could not authenticate you against the Jira instance.")
 	}
-}
-
-func isUserAuthCorrect(url string, c EJConfig, hc HttpClient) bool {
-	code, err := hc.HEAD(url, c)
-	if code == 200 {
-		// means authentication is successful. Need to save the config
-		return true
-	} else if code == 401 {
-		fmt.Printf("Error: User %s is not authenticated for this site: %s check your creds\n", c.Username, c.Url)
-		return false
-	} else if code == 403 {
-		fmt.Printf("Error: User %s has the correct creds but does not have the right access \n", c.Username)
-		return false
-	} else {
-		fmt.Printf("Error: %s\n", err)
-		return false
-	}
-	return true
 }
