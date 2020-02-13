@@ -52,3 +52,21 @@ func login(cmd *cobra.Command, args []string) {
 		fmt.Println("Explorer could not authenticate you against the Jira instance.")
 	}
 }
+
+var logoutCmd = &cobra.Command{
+	Use:   "logout",
+	Short: "logout and foget previous session if any",
+	Long:  `Allow the user to logout from the Jira instance and forget the previous session.`,
+	Run:   logout,
+}
+
+func logout(cmd *cobra.Command, args []string) {
+	conf := EJConfig{}
+	err := conf.cleanConfig()
+
+	if err != nil {
+		fmt.Printf("logout unsuccessful\n")
+	} else {
+		fmt.Printf("logout successful\n")
+	}
+}

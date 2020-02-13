@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -46,10 +47,10 @@ func (c *EJConfig) saveConfig() error {
 */
 func (c *EJConfig) configExists() bool {
 	ej := getEJConfigPath()
-	if _, err := os.Stat(ej); !os.IsExist(err) {
-		return false
-	} else {
+	if _, err := os.Stat(ej); err == nil {
 		return true
+	} else {
+		return false
 	}
 }
 
@@ -68,6 +69,24 @@ func (c *EJConfig) loadConfig() error {
 	err = d.Decode(c)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+/*
+  the clean method will remove the config.
+  This method will be used in the logout functionality.
+*/
+func (c *EJConfig) cleanConfig() error {
+	if c.configExists() {
+		p := getEJConfigPath()
+		err := os.Remove(p)
+		if err != nil {
+			fmt.Printf("Error cleaning config file %s, Error: %s\n", p, err)
+			return err
+		}
+	} else {
+		// do nothing
 	}
 	return nil
 }

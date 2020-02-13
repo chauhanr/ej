@@ -56,4 +56,6 @@ func init() {
 	loginCmd.MarkFlagRequired("url")
 	rootCmd.AddCommand(loginCmd)
 
+	rootCmd.AddCommand(logoutCmd)
+
 }
