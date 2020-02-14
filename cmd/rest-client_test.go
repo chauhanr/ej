@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -50,15 +49,30 @@ func TestGETMethodClient403(t *testing.T) {
 
 }
 
+func TestGETMethodClient401(t *testing.T) {
+	hc, teardown := mock.TestingHttpClient(http.HandlerFunc(GetMethodHandler401))
+	defer teardown()
+	cli := HttpClient{Client: hc}
+	ej := EJConfig{}
+	_, code := cli.GET(tcase200.url, ej)
+	if code != http.StatusUnauthorized {
+		t.Errorf("Expected status code %d but got code %d", http.StatusUnauthorized, code)
+	}
+
+}
+
 func GetMethodHandler403(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusForbidden)
+}
+
+func GetMethodHandler401(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusUnauthorized)
 }
 
 func GetMethodHandler200(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.Encode(tcase200.Case)
-	fmt.Println(buf.String())
 	_, err := w.Write(buf.Bytes())
 
 	if err != nil {
