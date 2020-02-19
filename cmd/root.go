@@ -17,9 +17,16 @@ var banner = `
                `
 
 var (
-	username string
-	password string
-	url      string
+	username          string
+	password          string
+	url               string
+	fieldCustomFilter bool
+	fieldSystemFilter bool
+)
+
+const (
+	FIELD_CUSTOM_FILTER = "custom-filter"
+	FIELD_SYSTEM_FILTER = "system-filter"
 )
 
 var rootCmd = &cobra.Command{
@@ -58,4 +65,9 @@ func init() {
 
 	rootCmd.AddCommand(logoutCmd)
 
+	/* Basics commands to list fields etc.*/
+	fieldsCmd.Flags().BoolVarP(&fieldCustomFilter, FIELD_CUSTOM_FILTER, "c", false, "Filter custom fields only")
+	fieldsCmd.Flags().BoolVarP(&fieldSystemFilter, FIELD_SYSTEM_FILTER, "s", false, "Filter system fields only")
+
+	rootCmd.AddCommand(fieldsCmd)
 }

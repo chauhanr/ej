@@ -70,3 +70,59 @@ func logout(cmd *cobra.Command, args []string) {
 		fmt.Printf("logout successful\n")
 	}
 }
+
+var fieldsCmd = &cobra.Command{
+	Use:   "field",
+	Short: "lists fields in the Jira instance.",
+	Long:  "The fields can be filtered on being custom or system generated one",
+	Run:   getFields,
+}
+
+func getFields(cmd *cobra.Command, args []string) {
+	if !areUserCredsSaved() {
+		fmt.Println("No user credentails found.")
+		loginCmd.Usage()
+	} else {
+		// call the get Fields REST call.
+		c, _ := cmd.Flags().GetBool(FIELD_CUSTOM_FILTER)
+		s, _ := cmd.Flags().GetBool(FIELD_SYSTEM_FILTER)
+		if c && !s {
+			f, err := getCustomFields()
+			if err != nil {
+				fmt.Printf("Error: %s\n", err)
+				return
+			}
+			fmt.Printf("Fields %v\n", f)
+			return
+		} else if !c && s {
+			f, err := getSystemFields()
+			if err != nil {
+				fmt.Printf("Error: %s\n", err)
+				return
+			}
+			fmt.Printf("Fields %v\n", f)
+			return
+		} else {
+			f, err := getAllFields()
+			if err != nil {
+				fmt.Printf("Error: %s\n", err)
+				return
+			}
+			fmt.Printf("Fields %v\n", f)
+			return
+		}
+	}
+}
+
+/*
+  check the creds are present or not.
+*/
+func areUserCredsSaved() bool {
+	conf := EJConfig{}
+	err := conf.loadConfig()
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
