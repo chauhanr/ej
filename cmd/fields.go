@@ -3,15 +3,16 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
 
-func getAllFields() ([]Field, error) {
+func getAllFields() (Fields, error) {
 	f := []Field{}
 	c, err := checkEJConfigAndLoad()
 	if err != nil {
-		return f, err
+		return Fields{Field: f}, err
 	}
 
 	b := JiraUrlBuilder{Base: c.Url}
@@ -25,29 +26,30 @@ func getAllFields() ([]Field, error) {
 		d := json.NewDecoder(reader)
 		err := d.Decode(&f)
 		if err != nil {
-			return f, err
+			return Fields{Field: f}, err
 		}
+		return Fields{Field: f}, nil
 
 	} else if code == http.StatusUnauthorized {
-		return f, errors.New("User is unauthorized")
+		return Fields{Field: f}, errors.New("User is unauthorized")
 	} else if code == http.StatusForbidden {
-		return f, errors.New("User is forbidden to access this resource")
+		return Fields{Field: f}, errors.New("User is forbidden to access this resource")
 	}
-	return f, errors.New("Unknow Error with http status code: " + string(code))
+	e := fmt.Sprintf("Unknow Error with http status code: %d\n", code)
+	return Fields{Field: f}, errors.New(e)
 }
 
-func getSystemFields() ([]Field, error) {
-	f := []Field{}
+func getSystemFields() (Fields, error) {
 	_, err := checkEJConfigAndLoad()
 	if err != nil {
-		return f, err
+		return Fields{}, err
 	}
-	f, err = getAllFields()
+	f, err := getAllFields()
 	if err != nil {
 		return f, err
 	}
-	filtered := filterFields(f, false)
-	return filtered, nil
+	filtered := filterFields(f.Field, false)
+	return Fields{Field: filtered}, nil
 }
 
 func filterFields(fields []Field, needCustom bool) []Field {
@@ -60,15 +62,14 @@ func filterFields(fields []Field, needCustom bool) []Field {
 	return fs
 }
 
-func getCustomFields() ([]Field, error) {
-	f := []Field{}
+func getCustomFields() (Fields, error) {
 	_, err := checkEJConfigAndLoad()
 	if err != nil {
-		return f, err
+		return Fields{}, err
 	}
-	f, err = getAllFields()
-	filtered := filterFields(f, true)
-	return filtered, nil
+	f, err := getAllFields()
+	filtered := filterFields(f.Field, true)
+	return Fields{Field: filtered}, nil
 }
 
 func checkEJConfigAndLoad() (EJConfig, error) {
@@ -78,6 +79,21 @@ func checkEJConfigAndLoad() (EJConfig, error) {
 		return EJConfig{}, errors.New("User credentials could not be found")
 	}
 	return c, nil
+}
+
+type Fields struct {
+	Field []Field
+}
+
+func (f *Fields) DisplayFields() {
+	if len(f.Field) != 0 {
+		fmt.Printf("------------------------------------------------------------------------\n")
+		fmt.Printf("%20.20s | %30.30s | %8.8s\n", "Field Id", "Field Name", "Custom")
+		fmt.Printf("------------------------------------------------------------------------\n")
+		for _, f := range f.Field {
+			fmt.Printf("%20.20s | %30.30s | %5.5t\n", f.Id, f.Name, f.Custom)
+		}
+	}
 }
 
 /* Structure for Fields*/

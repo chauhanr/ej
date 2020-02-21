@@ -92,14 +92,14 @@ func (c *EJConfig) cleanConfig() error {
 }
 
 func getEJConfigPath() string {
-	h := os.Getenv("HOME")
-	ej := filepath.Join(h, EJ_HOME, EJ_CONF)
+	home, _ := os.UserHomeDir()
+	ej := filepath.Join(home, EJ_HOME, EJ_CONF)
 	return ej
 }
 
 func getEJConfigDir() string {
-	h := os.Getenv("HOME")
-	ej := filepath.Join(h, EJ_HOME)
+	home, _ := os.UserHomeDir()
+	ej := filepath.Join(home, EJ_HOME)
 	return ej
 }
 

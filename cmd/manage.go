@@ -92,7 +92,7 @@ func getFields(cmd *cobra.Command, args []string) {
 				fmt.Printf("Error: %s\n", err)
 				return
 			}
-			fmt.Printf("Fields %v\n", f)
+			f.DisplayFields()
 			return
 		} else if !c && s {
 			f, err := getSystemFields()
@@ -100,7 +100,7 @@ func getFields(cmd *cobra.Command, args []string) {
 				fmt.Printf("Error: %s\n", err)
 				return
 			}
-			fmt.Printf("Fields %v\n", f)
+			f.DisplayFields()
 			return
 		} else {
 			f, err := getAllFields()
@@ -108,7 +108,7 @@ func getFields(cmd *cobra.Command, args []string) {
 				fmt.Printf("Error: %s\n", err)
 				return
 			}
-			fmt.Printf("Fields %v\n", f)
+			f.DisplayFields()
 			return
 		}
 	}

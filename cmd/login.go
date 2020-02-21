@@ -6,7 +6,6 @@ import (
 )
 
 func isUserAuthCorrect(url string, c EJConfig, hc HttpClient) int {
-	fmt.Println("URL: " + url)
 	code, err := hc.HEAD(url, c)
 	if code == http.StatusOK {
 		// means authentication is successful. Need to save the config
