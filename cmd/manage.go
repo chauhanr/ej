@@ -114,6 +114,31 @@ func getFields(cmd *cobra.Command, args []string) {
 	}
 }
 
+var ptreeCmd = &cobra.Command{
+	Use:   "ptree",
+	Short: "get the project structure displayed.",
+	Long:  `Project, Issues and Sprint structure in tree form`,
+	Run:   pTree,
+}
+
+/*  this methos prepares the project tree structure*/
+func pTree(cmd *cobra.Command, args []string) {
+	if !areUserCredsSaved() {
+		fmt.Println("No user credentails found.")
+		loginCmd.Usage()
+	} else {
+		pId, _ := cmd.Flags().GetString(PROJECT_FILTER)
+		c := EJConfig{}
+		c.loadConfig()
+		_, err := prepareProjectTree(pId, c)
+		if err != nil {
+			fmt.Printf("%s\n", err)
+		}
+		//fmt.Printf("Issue List: %v\n", l)
+	}
+
+}
+
 /*
   check the creds are present or not.
 */

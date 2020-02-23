@@ -22,11 +22,13 @@ var (
 	url               string
 	fieldCustomFilter bool
 	fieldSystemFilter bool
+	projectId         string
 )
 
 const (
 	FIELD_CUSTOM_FILTER = "custom-filter"
 	FIELD_SYSTEM_FILTER = "system-filter"
+	PROJECT_FILTER      = "project-id"
 )
 
 var rootCmd = &cobra.Command{
@@ -70,4 +72,13 @@ func init() {
 	fieldsCmd.Flags().BoolVarP(&fieldSystemFilter, FIELD_SYSTEM_FILTER, "s", false, "Filter system fields only")
 
 	rootCmd.AddCommand(fieldsCmd)
+
+	/**
+	  project structure and sprints along with issues.
+	  pstruct - project structure.
+	*/
+	ptreeCmd.Flags().StringVarP(&projectId, PROJECT_FILTER, "p", "", "project id / key to search for the issue list")
+	ptreeCmd.MarkFlagRequired(PROJECT_FILTER)
+
+	rootCmd.AddCommand(ptreeCmd)
 }
