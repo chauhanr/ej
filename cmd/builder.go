@@ -26,7 +26,7 @@ const (
 	ISSUE_ID_HOLDER       = "{issue-id}"
 	PROJECT_ISSUE_JQL_URL = REST_API + VERSION_HOLDER + "/search?jql=project=" + PROJECT_HOLDER + "&fields=id,key,issuetype&maxResults=" + PAGE_SIZE
 
-	AGILE_ISSUE_SPRINT_URL = REST_AGILE + VERSION_HOLDER + "/issue/" + ISSUE_ID_HOLDER + "?fields=parent,sprint,closedSprints"
+	AGILE_ISSUE_SPRINT_URL = REST_AGILE + VERSION_HOLDER + "/issue/" + ISSUE_ID_HOLDER + "?fields=parent,issuetype,sprint,closedSprints"
 )
 
 type JiraUrlBuilder struct {
@@ -64,7 +64,7 @@ func (b *JiraUrlBuilder) BuildIssueSprintResponseUrl(v string, issueId string) s
 	if v == "" {
 		v = DEFAULT_AGILE_VERSION
 	}
-	url = url + PROJECT_ISSUE_JQL_URL
+	url = url + AGILE_ISSUE_SPRINT_URL
 	url = strings.Replace(url, VERSION_HOLDER, v, -1)
 	url = strings.Replace(url, ISSUE_ID_HOLDER, issueId, -1)
 	return url

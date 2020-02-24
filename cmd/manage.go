@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -130,13 +132,14 @@ func pTree(cmd *cobra.Command, args []string) {
 		pId, _ := cmd.Flags().GetString(PROJECT_FILTER)
 		c := EJConfig{}
 		c.loadConfig()
-		_, err := prepareProjectTree(pId, c)
+		p, err := getProjectTree(pId, c)
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
-		//fmt.Printf("Issue List: %v\n", l)
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "\t")
+		enc.Encode(p)
 	}
-
 }
 
 /*
