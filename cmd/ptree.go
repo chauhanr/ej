@@ -307,8 +307,13 @@ func (s *DSprint) Traverse(tprint treeprint.Tree) {
 	sprint := fmt.Sprintf("Sprint Id: %s, Name: %s", s.Id, s.Name)
 	tp := tprint.AddBranch(sprint)
 	if s.Issues != nil {
-		for _, issue := range s.Issues {
-			issue.Traverse(tp)
+		for _, i := range s.Issues {
+			k := i.Key
+			id := i.Id
+			tn := i.IssueType.Name
+			is := fmt.Sprintf("Issue id: %s, key: %s, type: %s", id, k, tn)
+			tree := tp.AddBranch(is)
+			i.Traverse(tree)
 		}
 	}
 }
@@ -363,13 +368,13 @@ type DIssue struct {
 }
 
 func (d *DIssue) Traverse(tprint treeprint.Tree) {
-	k := d.Key
-	id := d.Id
-	tn := d.IssueType.Name
-	issue := fmt.Sprintf("Issue id: %s, key: %s, type: %s", id, k, tn)
-	tp := tprint.AddNode(issue)
 	if d.ChildIssues != nil {
 		for _, ci := range d.ChildIssues {
+			k := ci.Key
+			id := ci.Id
+			tn := ci.IssueType.Name
+			issue := fmt.Sprintf("Issue id: %s, key: %s, type: %s", id, k, tn)
+			tp := tprint.AddNode(issue)
 			ci.Traverse(tp)
 		}
 	}
