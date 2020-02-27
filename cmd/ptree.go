@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/xlab/treeprint"
 )
 
 func getProjectTree(pId string, config EJConfig) (*Project, error) {
@@ -25,9 +27,7 @@ func getProjectTree(pId string, config EJConfig) (*Project, error) {
 			return nil, err
 		}
 		issues, imap := getAllIssueIdMap(il.Issues)
-		//fmt.Printf("Issue Id: %v\n", issues)
 		project, err := buildProjectTreeStruct(projectId, issues, imap, config)
-
 		if err != nil {
 			return nil, err
 		}
@@ -272,6 +272,15 @@ func (p *Project) AddSprint(sprint *DSprint) {
 	p.Sprints = append(p.Sprints, sprint)
 }
 
+func (p *Project) Traverse(tprint treeprint.Tree) {
+	if p.Sprints != nil {
+		for _, s := range p.Sprints {
+			tp := tprint.AddBranch(p.Id)
+			s.Traverse(tp)
+		}
+	}
+}
+
 func (p *Project) SearchIssue(id string, issueType string) *DIssue {
 	if p.Sprints == nil || len(p.Sprints) == 0 {
 		return nil
@@ -292,6 +301,16 @@ type DSprint struct {
 	StartDate   string    `json:"startDate"`
 	EndDate     string    `json:"endDate"`
 	Issues      []*DIssue `json:"issue"`
+}
+
+func (s *DSprint) Traverse(tprint treeprint.Tree) {
+	sprint := fmt.Sprintf("Sprint Id: %s, Name: %s", s.Id, s.Name)
+	tp := tprint.AddBranch(sprint)
+	if s.Issues != nil {
+		for _, issue := range s.Issues {
+			issue.Traverse(tp)
+		}
+	}
 }
 
 func (s *DSprint) SearchIssue(id string, issueType string) *DIssue {
@@ -341,6 +360,19 @@ type DIssue struct {
 	Key         string     `json:"key"`
 	IssueType   JIssueType `json:"issuetype"`
 	ChildIssues []*DIssue  `json:"child-issues"`
+}
+
+func (d *DIssue) Traverse(tprint treeprint.Tree) {
+	k := d.Key
+	id := d.Id
+	tn := d.IssueType.Name
+	issue := fmt.Sprintf("Issue id: %s, key: %s, type: %s", id, k, tn)
+	tp := tprint.AddNode(issue)
+	if d.ChildIssues != nil {
+		for _, ci := range d.ChildIssues {
+			ci.Traverse(tp)
+		}
+	}
 }
 
 func (d *DIssue) populateFields(issue *JIssue) {

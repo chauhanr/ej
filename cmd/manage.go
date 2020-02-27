@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/xlab/treeprint"
 )
 
 var versionCmd = &cobra.Command{
@@ -136,9 +137,18 @@ func pTree(cmd *cobra.Command, args []string) {
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "\t")
-		enc.Encode(p)
+		oFormat, _ := cmd.Flags().GetBool(JSON_OUTPUT_FORMAT)
+		if oFormat {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "\t")
+			enc.Encode(p)
+		} else {
+			tprint := treeprint.New()
+			if p != nil {
+				p.Traverse(tprint)
+				fmt.Println(tprint.String())
+			}
+		}
 	}
 }
 

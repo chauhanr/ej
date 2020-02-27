@@ -23,12 +23,14 @@ var (
 	fieldCustomFilter bool
 	fieldSystemFilter bool
 	projectId         string
+	outputFormat      bool
 )
 
 const (
 	FIELD_CUSTOM_FILTER = "custom-filter"
 	FIELD_SYSTEM_FILTER = "system-filter"
 	PROJECT_FILTER      = "project-id"
+	JSON_OUTPUT_FORMAT  = "json-format"
 )
 
 var rootCmd = &cobra.Command{
@@ -79,6 +81,7 @@ func init() {
 	*/
 	ptreeCmd.Flags().StringVarP(&projectId, PROJECT_FILTER, "p", "", "project id / key to search for the issue list")
 	ptreeCmd.MarkFlagRequired(PROJECT_FILTER)
+	ptreeCmd.Flags().BoolVarP(&outputFormat, JSON_OUTPUT_FORMAT, "o", false, "display the project structure in json")
 
 	rootCmd.AddCommand(ptreeCmd)
 }
