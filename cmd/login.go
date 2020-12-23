@@ -20,5 +20,4 @@ func isUserAuthCorrect(url string, c EJConfig, hc HttpClient) int {
 		fmt.Printf("Error: %s\n", err)
 		return http.StatusInternalServerError
 	}
-	return http.StatusOK
 }

@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	EJ_HOME = ".ej"
-	EJ_CONF = "ejconf.json"
+	EJ_HOME      = ".ej"
+	EJ_CONF      = "ejconf.json"
+	IGNORE_BOARD = "board_ignore.json"
 )
 
 type EJConfig struct {
@@ -105,6 +106,74 @@ func getEJConfigDir() string {
 
 func EncodeCreds(username, password string) string {
 	cred := username + ":" + password
-	b64 := base64.StdEncoding.EncodeToString([]byte(cred))
+	b64 := base64.URLEncoding.EncodeToString([]byte(cred))
 	return b64
+}
+
+/*IgnoreBoardConfig will be used to save and load the ignore boards list*/
+type IgnoreBoardConfig struct {
+	BoardList []string `json:"boardIds"`
+}
+
+func (c *IgnoreBoardConfig) cleanConfig() error {
+	if c.configExists() {
+		p := getIgnoreBoardPath()
+		err := os.Remove(p)
+		if err != nil {
+			fmt.Printf("Error cleaning config file %s, Error: %s\n", p, err)
+			return err
+		}
+	} else {
+		// do nothing
+	}
+	return nil
+}
+
+func getIgnoreBoardPath() string {
+	home, _ := os.UserHomeDir()
+	ej := filepath.Join(home, EJ_HOME, IGNORE_BOARD)
+	return ej
+}
+
+func (c *IgnoreBoardConfig) configExists() bool {
+	ej := getIgnoreBoardPath()
+	if _, err := os.Stat(ej); err == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (c *IgnoreBoardConfig) saveConfig() error {
+	ejd := getEJConfigDir()
+	if _, err := os.Stat(ejd); !os.IsExist(err) {
+		os.MkdirAll(ejd, os.ModePerm)
+	}
+	ej := getIgnoreBoardPath()
+	file, err := os.OpenFile(ej, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return errors.New("Error reading file: " + ej)
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(c)
+	if err != nil {
+		return errors.New("Error encoding file: " + ej + " error: " + err.Error())
+	}
+	return nil
+}
+
+func (c *IgnoreBoardConfig) loadConfig() error {
+	ej := getIgnoreBoardPath()
+	file, err := os.Open(ej)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	d := json.NewDecoder(file)
+	err = d.Decode(c)
+	if err != nil {
+		return err
+	}
+	return nil
 }

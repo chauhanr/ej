@@ -6,6 +6,7 @@ package cmd
 */
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ const (
 	VERSION_HOLDER = "{version}"
 
 	FIELDS_URL = REST_API + VERSION_HOLDER + "/field"
+	BOARD_URL  = REST_AGILE + VERSION_HOLDER + "/board"
 
 	PROJECT_HOLDER        = "{project-id}"
 	PAGE_SIZE             = "{page-size}"
@@ -41,6 +43,26 @@ func (b *JiraUrlBuilder) BuildAuthCheckUrl(v string) string {
 	url = url + AUTH_CHECK_URL
 
 	url = strings.Replace(url, VERSION_HOLDER, v, -1)
+	return url
+}
+
+/*BuildBoardURL create a URL to get the board either scrum, kanban or all*/
+func (b *JiraUrlBuilder) BuildBoardURL(v string, bType string, maxResults int, startAt int) string {
+	if v == "" {
+		v = DEFAULT_AGILE_VERSION
+	}
+	url := handleTrailingSlash(b.Base)
+	url = url + BOARD_URL
+	url = strings.Replace(url, VERSION_HOLDER, v, -1)
+	switch bType {
+	case "kanban":
+		url = url + "?type=kanban"
+	case "scrum":
+		url = url + "?type=scrum"
+	}
+	startIndex := fmt.Sprintf("&startAt=%d", startAt)
+	maxResultsValue := fmt.Sprintf("&maxResults=%d", maxResults)
+	url = url + startIndex + maxResultsValue
 	return url
 }
 

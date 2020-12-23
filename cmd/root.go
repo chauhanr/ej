@@ -23,6 +23,8 @@ var (
 	fieldCustomFilter bool
 	fieldSystemFilter bool
 	projectId         string
+	boardType         string
+	boardList         string
 	outputFormat      bool
 )
 
@@ -30,7 +32,9 @@ const (
 	FIELD_CUSTOM_FILTER = "custom-filter"
 	FIELD_SYSTEM_FILTER = "system-filter"
 	PROJECT_FILTER      = "project-id"
+	BOARD_TYPE          = "board-type"
 	JSON_OUTPUT_FORMAT  = "json-format"
+	BOARDLIST           = "board-list"
 )
 
 var rootCmd = &cobra.Command{
@@ -84,4 +88,11 @@ func init() {
 	ptreeCmd.Flags().BoolVarP(&outputFormat, JSON_OUTPUT_FORMAT, "o", false, "display the project structure in json")
 
 	rootCmd.AddCommand(ptreeCmd)
+
+	boardListCmd.Flags().StringVarP(&boardType, BOARD_TYPE, "t", "", "board type can have two values kanban or scrum")
+	boardCmd.AddCommand(boardListCmd)
+	boardIgnoreCmd.Flags().StringVarP(&boardList, BOARDLIST, "l", "", "list of boards by space values while will be split")
+	boardIgnoreCmd.MarkFlagRequired(BOARDLIST)
+	boardCmd.AddCommand(boardIgnoreCmd)
+	rootCmd.AddCommand(boardCmd)
 }
