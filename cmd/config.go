@@ -10,10 +10,95 @@ import (
 )
 
 const (
-	EJ_HOME      = ".ej"
-	EJ_CONF      = "ejconf.json"
-	IGNORE_BOARD = "board_ignore.json"
+	EJ_HOME           = ".ej"
+	EJ_CONF           = "ejconf.json"
+	IGNORE_BOARD      = "board_ignore.json"
+	ISSUE_BOARD_STORE = "issue-board.json"
+	ISSUETYPE_STORE   = "issue-type.json"
+	KANBAN_BOARDS     = "kanban_board.json"
+	SCRUM_BOARDS      = "scrum_boards.json"
 )
+
+/*BoardsDatabase stores a list of boards based on scrum and kanban board*/
+type BoardsDatabase struct {
+	BoardType string  `json:"boardType"`
+	BoardList []Board `json:"boards"`
+}
+
+func (c *BoardsDatabase) cleanConfig() error {
+	if c.configExists() {
+		p := getBoardDatabasePath(c.BoardType)
+		err := os.Remove(p)
+		if err != nil {
+			fmt.Printf("Error cleaning config file %s, Error: %s\n", p, err)
+			return err
+		}
+	} else {
+		// do nothing
+	}
+	return nil
+}
+
+func (c *BoardsDatabase) configExists() bool {
+	ej := getBoardDatabasePath(c.BoardType)
+	if _, err := os.Stat(ej); err == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (c *BoardsDatabase) loadConfig() error {
+	db := getBoardDatabasePath(c.BoardType)
+	file, err := os.Open(db)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	d := json.NewDecoder(file)
+	err = d.Decode(c)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getBoardDatabasePath(bType string) string {
+	home, _ := os.UserHomeDir()
+	var db string
+	if bType == "scrum" {
+		db = filepath.Join(home, EJ_HOME, SCRUM_BOARDS)
+	} else {
+		db = filepath.Join(home, EJ_HOME, KANBAN_BOARDS)
+	}
+	return db
+}
+
+func (c *BoardsDatabase) saveConfig() error {
+	ejd := getEJConfigDir()
+	if _, err := os.Stat(ejd); !os.IsExist(err) {
+		os.MkdirAll(ejd, os.ModePerm)
+	}
+	var path string
+	if c.BoardType == "scrum" {
+		path = getBoardDatabasePath("scrum")
+	} else if c.BoardType == "kanban" {
+		path = getBoardDatabasePath("kanban")
+	} else {
+		return errors.New("unknow board type: " + c.BoardType)
+	}
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return errors.New("Error reading file: " + path)
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(c)
+	if err != nil {
+		return errors.New("Error encoding file: " + path + " error: " + err.Error())
+	}
+	return nil
+}
 
 type EJConfig struct {
 	Url      string `json:"url"`
@@ -176,4 +261,17 @@ func (c *IgnoreBoardConfig) loadConfig() error {
 		return err
 	}
 	return nil
+}
+
+func (c *IgnoreBoardConfig) contains(bID string) bool {
+	if !c.configExists() {
+		return false
+	}
+	for _, b := range c.BoardList {
+		if b == bID {
+			return true
+		}
+	}
+	return false
+
 }

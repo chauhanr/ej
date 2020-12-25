@@ -19,13 +19,16 @@ var banner = `
 var (
 	username          string
 	password          string
-	url               string
+	URL               string
 	fieldCustomFilter bool
 	fieldSystemFilter bool
 	projectId         string
 	boardType         string
 	boardList         string
+	startDate         string
 	outputFormat      bool
+	displayFlagUnique bool
+	displayFlagType   bool
 )
 
 const (
@@ -35,6 +38,9 @@ const (
 	BOARD_TYPE          = "board-type"
 	JSON_OUTPUT_FORMAT  = "json-format"
 	BOARDLIST           = "board-list"
+	UNIQUE_ISSUE        = "unique-issue"
+	ISSUE_BY_TYPE       = "issue-bytype"
+	START_DATE          = "start-date"
 )
 
 var rootCmd = &cobra.Command{
@@ -65,10 +71,10 @@ func init() {
 
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "username for login")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "user password login")
-	loginCmd.Flags().StringVarP(&url, "url", "a", "", "url for the jira instance")
+	loginCmd.Flags().StringVarP(&URL, "URL", "a", "", "URL for the jira instance")
 	loginCmd.MarkFlagRequired("username")
 	loginCmd.MarkFlagRequired("password")
-	loginCmd.MarkFlagRequired("url")
+	loginCmd.MarkFlagRequired("URL")
 	rootCmd.AddCommand(loginCmd)
 
 	rootCmd.AddCommand(logoutCmd)
@@ -95,4 +101,14 @@ func init() {
 	boardIgnoreCmd.MarkFlagRequired(BOARDLIST)
 	boardCmd.AddCommand(boardIgnoreCmd)
 	rootCmd.AddCommand(boardCmd)
+
+	issueListCmd.Flags().StringVarP(&boardType, BOARD_TYPE, "t", "", "board type can have two values kanban or scrum")
+	issueListCmd.Flags().StringVarP(&startDate, START_DATE, "s", "", "board type can have two values kanban or scrum")
+	issueCmd.AddCommand(issueListCmd)
+	issueDisplayCmd.Flags().StringVarP(&boardType, BOARD_TYPE, "t", "", "board type can have two values kanban or scrum")
+	issueDisplayCmd.Flags().BoolVarP(&displayFlagUnique, UNIQUE_ISSUE, "u", false, "this will display all the unique issues across all boards.")
+	issueDisplayCmd.Flags().BoolVarP(&displayFlagType, ISSUE_BY_TYPE, "i", false, "this will display all the unique issues across all boards.")
+	issueCmd.AddCommand(issueDisplayCmd)
+	rootCmd.AddCommand(issueCmd)
+
 }

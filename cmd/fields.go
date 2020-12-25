@@ -90,9 +90,9 @@ func (f *Fields) DisplayFields() {
 		fmt.Printf("------------------------------------------------------------------------\n")
 		fmt.Printf("%20.20s | %30.30s | %8.8s\n", "Field Id", "Field Name", "Custom")
 		fmt.Printf("------------------------------------------------------------------------\n")
-		for _, f := range f.Field {
+		/*for _, f := range f.Field {
 			fmt.Printf("%20.20s | %30.30s | %5.5t\n", f.Id, f.Name, f.Custom)
-		}
+		}*/
 	}
 }
 

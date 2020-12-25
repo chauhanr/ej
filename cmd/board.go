@@ -61,10 +61,20 @@ func boardsList(cmd *cobra.Command, args []string) {
 		loginCmd.Usage()
 	} else {
 		bType, _ := cmd.Flags().GetString(BOARD_TYPE)
+		bDB := BoardsDatabase{}
+		bDB.BoardType = bType
+		if bDB.configExists() {
+			err := bDB.loadConfig()
+			if err != nil {
+				fmt.Printf("error loading data from saved config for board type: %s", bType)
+				return
+			}
+			fmt.Printf("There are %d %s type boards in this Jira instance.", len(bDB.BoardList), bType)
+			return
+		}
 		c := EJConfig{}
 		c.loadConfig()
 		boards := []Board{}
-		fmt.Printf("Looking for Board type: %s\n", bType)
 		bType = strings.ToLower(bType)
 		if bType != "scrum" && bType != "kanban" {
 			fmt.Printf("Kindly choose scrum/kanban board type use have entered: %s", bType)
@@ -77,6 +87,13 @@ func boardsList(cmd *cobra.Command, args []string) {
 		}
 		// calculate the last page work
 		fmt.Printf("There are %d %s type boards in this Jira instance.", len(boards), bType)
+		// save the file
+		bDB.BoardList = boards
+		err = bDB.saveConfig()
+		if err != nil {
+			fmt.Printf("error saving the boards to the file %s\n", err)
+			return
+		}
 	}
 }
 
